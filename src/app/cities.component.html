@@ -1,0 +1,42 @@
+<h1>Hello</h1>
+
+<form>
+  <label> search </label>
+  <input (keyup)="this.api.search$.next({ name: $any($event).target.value })" />
+</form>
+
+<hr />
+
+<ol *ngIf="api.items$ | async as items">
+  <li *ngFor="let item of items; let i = index">{{ item.name }}</li>
+</ol>
+
+<hr />
+
+<ng-container *ngIf="api.pagination$ | async as pagination">
+  Page: {{ pagination.page }} <br />
+
+  <button
+    [disabled]="pagination.page <= 1"
+    (click)="
+      api.pagination$.next({
+        page: pagination.page - 1,
+        limit: pagination.limit
+      })
+    "
+  >
+    <-
+  </button>
+
+  <button
+    (click)="
+      api.pagination$.next({
+        page: pagination.page + 1,
+        limit: pagination.limit
+      })
+    "
+    [disabled]="(api.itemsCount$ | async) < pagination.limit"
+  >
+    ->
+  </button>
+</ng-container>

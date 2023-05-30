@@ -1,6 +1,13 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Inject, Injectable, InjectionToken } from '@angular/core';
-import { Observable, startWith, Subject } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  Observable,
+  startWith,
+  Subject,
+  tap,
+} from 'rxjs';
 import {
   map,
   distinctUntilChanged,
@@ -41,12 +48,19 @@ export class QueryableApiService<T = unknown> {
     console.log('setup', config);
   }
 
-  // crud
+  private readonly defaultPagination = {
+    page: 1,
+    limit: 10,
+  };
+
+  // crud methods
   public create() {
     return this.httpClient.get<T[]>(this.API_ENDPOINT);
   }
   public read() {
-    return this.httpClient.get<T[]>(this.API_ENDPOINT);
+    return this.httpClient.get<T[]>(this.API_ENDPOINT, {
+      params: this.defaultPagination,
+    });
   }
   public update() {
     return this.httpClient.get<T[]>(this.API_ENDPOINT);
@@ -55,32 +69,30 @@ export class QueryableApiService<T = unknown> {
     return this.httpClient.get<T[]>(this.API_ENDPOINT);
   }
 
-  public query(payload) {
-    return this.httpClient.get<T[]>(this.API_ENDPOINT);
+  public query(searchObj: object, pagination: object) {
+    console.log('calling api');
+    return this.httpClient.get<T[]>(this.API_ENDPOINT, {
+      params: { ...pagination, ...searchObj },
+    });
   }
 
-  //
-  public search$ = new Subject<string>();
+  // public Observables
+  public search$ = new BehaviorSubject<Record<string, string>>(null);
+  public pagination$ = new BehaviorSubject<{ page: number; limit: number }>(
+    this.defaultPagination
+  );
 
-  public items$: Observable<T[]> = this.search$.pipe(
-    startWith(null),
+  public items$: Observable<T[]> = combineLatest([
+    this.search$.pipe(tap(() => this.pagination$.next(this.defaultPagination))),
+    this.pagination$,
+  ]).pipe(
     debounceTime(600),
-    switchMap((searchStr) => {
-      if (searchStr) {
-        return this.query({ searchStr }).pipe(map(filterBySearch(searchStr)));
-      } else {
-        return this.read();
-      }
+    switchMap(([searchObj, pagination]) => {
+      return this.query(searchObj, pagination);
     }),
     shareReplay()
   );
+
+  public itemsCount$ = this.items$.pipe(map((items) => items.length));
 }
 /***/
-
-// this should be filtered on the api, but we mock it here
-function filterBySearch(searchStr) {
-  return (results) =>
-    results.filter((item: any) =>
-      item.name.toLowerCase().includes(searchStr.toLowerCase())
-    );
-}

@@ -8,20 +8,7 @@ import {
 
 @Component({
   selector: 'hello',
-  template: `<h1>Hello</h1>
-
-  <form>
-  <label> search </label>
-  <input (keyup)="search($event)" />
-  </form>
-
-  <hr />
-
-  <ol *ngIf="api.items$ | async as items">
-    <li *ngFor="let item of items; let i = index">{{item.name}}</li>
-  </ol>
-
-  `,
+  templateUrl: 'cities.component.html',
   styles: [`h1 { font-family: Lato; }`],
   providers: [
     QueryableApiService,
@@ -29,6 +16,7 @@ import {
       provide: QUERYABLE_API_ENDPOINT_TOKEN,
       useValue: 'https://6089b8b68c8043001757f52f.mockapi.io/cities',
     },
+    // we config example
     {
       provide: QUERYABLE_API_CONFIG_TOKEN,
       useValue: {
@@ -38,10 +26,12 @@ import {
     },
   ],
 })
-export class HelloComponent {
+export class CitiesComponent {
   constructor(readonly api: QueryableApiService<ICity>) {}
 
+  ngOnInit() {}
+
   search(event) {
-    this.api.search$.next(event.target.value);
+    this.api.search$.next({ name: event.target.value });
   }
 }
