@@ -2,7 +2,7 @@
 
 <form>
   <label> search </label>
-  <input (keyup)="this.api.search$.next({ name: $any($event).target.value })" />
+  <input (keyup)="api.search$.next({ name: $any($event).target.value })" />
 </form>
 
 <hr />

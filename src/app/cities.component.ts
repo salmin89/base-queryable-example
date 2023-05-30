@@ -16,7 +16,7 @@ import {
       provide: QUERYABLE_API_ENDPOINT_TOKEN,
       useValue: 'https://6089b8b68c8043001757f52f.mockapi.io/cities',
     },
-    // we config example
+    // config example
     {
       provide: QUERYABLE_API_CONFIG_TOKEN,
       useValue: {

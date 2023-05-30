@@ -86,7 +86,7 @@ export class QueryableApiService<T = unknown> {
     this.search$.pipe(tap(() => this.pagination$.next(this.defaultPagination))),
     this.pagination$,
   ]).pipe(
-    debounceTime(600),
+    debounceTime(300),
     switchMap(([searchObj, pagination]) => {
       return this.query(searchObj, pagination);
     }),
